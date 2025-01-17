@@ -3,18 +3,18 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { PrismaService } from "src/prisma.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { compare, genSalt, hash } from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ROLE } from "@prisma/client";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly userService: UserService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -31,21 +31,15 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const user = await this.prisma.user.findFirst({
-      where: { email: registerDto.email },
-    });
-
+    const user = await this.userService.getUserByEmail(registerDto.email);
     if (user) {
       throw new BadRequestException("User with this email already exists");
     }
 
     const salt = await genSalt(10);
-    const newUser = await this.prisma.user.create({
-      data: {
-        email: registerDto.email,
-        username: registerDto.username,
-        password: await hash(registerDto.password, salt),
-      },
+    const newUser = await this.userService.create({
+      ...registerDto,
+      password: await hash(registerDto.password, salt),
     });
 
     const tokenPair = await this.createTokenPair({
@@ -68,9 +62,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: result.id },
-    });
+    const user = await this.userService.getUserById(result.id);
 
     const tokenPair = await this.createTokenPair({
       id: user.id,
@@ -95,9 +87,7 @@ export class AuthService {
   }
 
   async validateUser(loginDto: LoginDto) {
-    const user = await this.prisma.user.findFirst({
-      where: { email: loginDto.email },
-    });
+    const user = await this.userService.getUserByEmail(loginDto.email);
 
     if (!user) {
       throw new UnauthorizedException(

@@ -14,11 +14,11 @@ export class TeacherGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context
       .switchToHttp()
-      .getRequest<{ id: string; role: ROLE }>();
+      .getRequest<{ user: { id: string; role: ROLE } }>();
 
-    if (!(request.role === "teacher"))
+    if (!(request.user.role === "teacher"))
       throw new ForbiddenException("You're not a teacher!");
 
-    return request.role === "teacher";
+    return request.user.role === "teacher";
   }
 }

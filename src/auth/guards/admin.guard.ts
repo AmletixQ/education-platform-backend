@@ -14,11 +14,11 @@ export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context
       .switchToHttp()
-      .getRequest<{ id: string; role: ROLE }>();
+      .getRequest<{ user: { id: string; role: ROLE } }>();
 
-    if (!(request.role === "admin"))
+    if (!(request.user.role === "admin"))
       throw new ForbiddenException("You're not an admin!");
 
-    return request.role === "admin";
+    return request.user.role === "admin";
   }
 }
