@@ -1,0 +1,16 @@
+model Course {
+  id          String @id @default(cuid())
+  name        String
+  description String
+
+  homeworks Homework[]
+  Lessons   Lesson[]
+
+  teacher   Teacher @relation(fields: [teacherId], references: [userId])
+  teacherId String  @unique @map("teacher_id")
+
+  Student       Student? @relation(fields: [studentUserId], references: [userId])
+  studentUserId String?  @map("student_id")
+
+  @@map("courses")
+}

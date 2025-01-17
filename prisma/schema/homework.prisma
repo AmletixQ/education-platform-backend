@@ -1,0 +1,14 @@
+model Homework {
+  id String @id @default(cuid())
+
+  contentUrl String   @map("content_url")
+  comments   String[]
+
+  lesson   Lesson @relation(fields: [lessonId], references: [id])
+  lessonId String @unique @map("lesson_id")
+
+  Course   Course? @relation(fields: [courseId], references: [id])
+  courseId String? @map("course_id")
+
+  @@map("homeworks")
+}
