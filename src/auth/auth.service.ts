@@ -8,6 +8,7 @@ import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { compare, genSalt, hash } from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
+import { ROLE } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,11 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto);
-    const tokenPair = await this.createTokenPair(user.id);
+
+    const tokenPair = await this.createTokenPair({
+      id: user.id,
+      role: user.role,
+    });
 
     return {
       ...tokenPair,
@@ -43,7 +48,10 @@ export class AuthService {
       },
     });
 
-    const tokenPair = await this.createTokenPair(newUser.id);
+    const tokenPair = await this.createTokenPair({
+      id: newUser.id,
+      role: newUser.role,
+    });
 
     return {
       ...tokenPair,
@@ -64,19 +72,21 @@ export class AuthService {
       where: { id: result.id },
     });
 
-    const tokenPair = await this.createTokenPair(user.id);
+    const tokenPair = await this.createTokenPair({
+      id: user.id,
+      role: user.role,
+    });
     return {
       accessToken: tokenPair.accessToken,
       newRefreshToken: tokenPair.refreshToken,
     };
   }
 
-  async createTokenPair(uid: string) {
-    const data = { id: uid };
-
+  async createTokenPair(data: { id: string; role: ROLE }) {
     const refreshToken = await this.jwtService.signAsync(data, {
       expiresIn: "7d",
     });
+
     const accessToken = await this.jwtService.signAsync(data, {
       expiresIn: "15m",
     });
