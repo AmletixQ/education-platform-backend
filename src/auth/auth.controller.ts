@@ -14,7 +14,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { user, refreshToken, accessToken } =
+    const { refreshToken, accessToken } =
       await this.authService.login(loginDto);
 
     response.cookie("refreshToken", refreshToken, {
@@ -22,14 +22,13 @@ export class AuthController {
     });
 
     return {
-      user,
       accessToken,
     };
   }
 
   @Post("register")
   async register(@Body() registerDto: RegisterDto, @Res() response: Response) {
-    const { user, refreshToken, accessToken } =
+    const { refreshToken, accessToken } =
       await this.authService.register(registerDto);
 
     response.cookie("refreshToken", refreshToken, {
@@ -37,7 +36,6 @@ export class AuthController {
     });
 
     return {
-      user,
       accessToken,
     };
   }
@@ -47,7 +45,7 @@ export class AuthController {
     @Cookies("refreshToken") refreshToken: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { user, accessToken, newRefreshToken } =
+    const { accessToken, newRefreshToken } =
       await this.authService.refresh(refreshToken);
 
     response.cookie("refreshToken", newRefreshToken, {
@@ -55,7 +53,6 @@ export class AuthController {
     });
 
     return {
-      user,
       accessToken,
     };
   }

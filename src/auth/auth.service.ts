@@ -8,7 +8,6 @@ import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { compare, genSalt, hash } from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -22,7 +21,6 @@ export class AuthService {
     const tokenPair = await this.createTokenPair(user.id);
 
     return {
-      user: this.returnUserFields(user),
       ...tokenPair,
     };
   }
@@ -48,7 +46,6 @@ export class AuthService {
     const tokenPair = await this.createTokenPair(newUser.id);
 
     return {
-      user: this.returnUserFields(newUser),
       ...tokenPair,
     };
   }
@@ -69,7 +66,6 @@ export class AuthService {
 
     const tokenPair = await this.createTokenPair(user.id);
     return {
-      user: this.returnUserFields(user),
       accessToken: tokenPair.accessToken,
       newRefreshToken: tokenPair.refreshToken,
     };
@@ -104,13 +100,5 @@ export class AuthService {
     if (!isValidPassword) throw new UnauthorizedException("Invalid password");
 
     return user;
-  }
-
-  returnUserFields(user: User) {
-    return {
-      email: user.email,
-      username: user.username,
-      id: user.id,
-    };
   }
 }
