@@ -24,13 +24,35 @@ export class UserService {
       },
     });
 
+    const role = newUser.role;
+
+    if (role === "admin") {
+      await this.prisma.admin.create({
+        data: { userId: newUser.id },
+      });
+    } else if (role === "student") {
+      await this.prisma.student.create({
+        data: { userId: newUser.id },
+      });
+    } else if (role === "teacher") {
+      await this.prisma.teacher.create({
+        data: { userId: newUser.id },
+      });
+    }
+
     return newUser;
   }
 
   async getAllUsers() {
-    return (await this.prisma.user.findMany()).map((user) =>
-      this.returnUserFields(user),
-    );
+    return (
+      await this.prisma.user.findMany({
+        include: {
+          admin: true,
+          teacher: true,
+          student: true,
+        },
+      })
+    ).map((user) => this.returnUserFields(user));
   }
 
   async getProfile(userId: string) {
