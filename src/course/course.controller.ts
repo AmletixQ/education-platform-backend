@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+} from "@nestjs/common";
 import { CourseService } from "./course.service";
 import { UserId } from "src/user/decorators/userId.decorator";
 import { Auth } from "src/auth/decorators/auth.decorator";
@@ -7,6 +16,18 @@ import { CreateCourseDto, UpdateCourseDto } from "./dto/create.dto";
 @Controller("courses")
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
+
+  @Auth()
+  @Get(":courseId")
+  getCourse(@Param("courseId") courseId: string) {
+    return this.courseService.getCourse(courseId);
+  }
+
+  @Auth("teacher")
+  @Get(":courseId/students")
+  getStudents(@Param("courseId") courseId: string) {
+    return this.courseService.getStudents(courseId);
+  }
 
   @Auth()
   @Get()
@@ -21,12 +42,21 @@ export class CourseController {
   }
 
   @Auth("teacher")
-  @Patch(":courseId")
+  @Patch("connect/:courseId")
   addStudent(
     @Body("studentId") studentId: string,
     @Param("courseId") courseId: string,
   ) {
     return this.courseService.addStudent(studentId, courseId);
+  }
+
+  @Auth("teacher")
+  @Patch("disconnect/:courseId")
+  disconnectStudent(
+    @Body("studentId") studentId: string,
+    @Param("courseId") courseId: string,
+  ) {
+    return this.courseService.disconnectStudent(studentId, courseId);
   }
 
   @Auth("teacher")

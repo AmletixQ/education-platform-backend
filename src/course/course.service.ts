@@ -6,6 +6,23 @@ import { CreateCourseDto, UpdateCourseDto } from "./dto/create.dto";
 export class CourseService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getCourse(courseId: string) {
+    return this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+  }
+
+  async getStudents(courseId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        students: true,
+      },
+    });
+
+    return course?.students;
+  }
+
   async getCourses(userId: string) {
     const user = await this.prisma.teacher.findUnique({
       where: { userId },
@@ -29,6 +46,19 @@ export class CourseService {
       data: {
         students: {
           connect: {
+            userId: studentId,
+          },
+        },
+      },
+    });
+  }
+
+  disconnectStudent(studentId: string, courseId: string) {
+    return this.prisma.course.update({
+      where: { id: courseId },
+      data: {
+        students: {
+          disconnect: {
             userId: studentId,
           },
         },
