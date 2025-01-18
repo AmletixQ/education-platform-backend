@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { LoginDto } from "./dto/login.dto";
-import { compare, genSalt, hash } from "bcrypt";
+import { compare } from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ROLE } from "@prisma/client";
 import { UserService } from "src/user/user.service";
@@ -30,21 +26,12 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: CreateDto) {
-    const user = await this.userService.getUserByEmail(registerDto.email);
-    if (user) {
-      throw new BadRequestException("User with this email already exists");
-    }
-
-    const salt = await genSalt(10);
-    const newUser = await this.userService.create({
-      ...registerDto,
-      password: await hash(registerDto.password, salt),
-    });
+  async register(createDto: CreateDto) {
+    const user = await this.userService.create(createDto);
 
     const tokenPair = await this.createTokenPair({
-      id: newUser.id,
-      role: newUser.role,
+      id: user.id,
+      role: user.role,
     });
 
     return {

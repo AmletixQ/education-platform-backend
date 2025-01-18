@@ -4,13 +4,27 @@ import { User } from "@prisma/client";
 import { PrismaService } from "src/prisma.service";
 import { UpdateDto } from "./dto/update.dto";
 import { CreateDto } from "./dto/create.dto";
+import { genSalt, hash } from "bcrypt";
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateDto) {
-    return await this.prisma.user.create({ data: dto });
+    const user = await this.getUserByEmail(dto.email);
+    if (user) {
+      throw new BadRequestException("User with this email already exists");
+    }
+
+    const salt = await genSalt(10);
+    const newUser = await this.prisma.user.create({
+      data: {
+        ...dto,
+        password: await hash(dto.password, salt),
+      },
+    });
+
+    return newUser;
   }
 
   async getAllUsers() {
