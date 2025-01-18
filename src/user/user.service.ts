@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { User } from "@prisma/client";
-import { RegisterDto } from "src/auth/dto/register.dto";
 import { PrismaService } from "src/prisma.service";
 import { UpdateDto } from "./dto/update.dto";
+import { CreateDto } from "./dto/create.dto";
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateDto) {
+    return await this.prisma.user.create({ data: dto });
+  }
 
   async getAllUsers() {
     return (await this.prisma.user.findMany()).map((user) =>
@@ -45,10 +49,6 @@ export class UserService {
 
   async getUserByEmail(email: string) {
     return await this.prisma.user.findUnique({ where: { email } });
-  }
-
-  async create(dto: RegisterDto) {
-    return await this.prisma.user.create({ data: dto });
   }
 
   returnUserFields(user: User) {

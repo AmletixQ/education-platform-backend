@@ -1,9 +1,9 @@
 import { Body, Controller, Post, Res } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
-import { RegisterDto } from "./dto/register.dto";
 import { Response } from "express";
 import { Cookies } from "./decorators/cookies.decorator";
+import { CreateDto } from "src/user/dto/create.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -28,11 +28,11 @@ export class AuthController {
 
   @Post("register")
   async register(
-    @Body() registerDto: RegisterDto,
+    @Body() createDto: CreateDto,
     @Res({ passthrough: true }) response: Response,
   ) {
     const { refreshToken, accessToken } =
-      await this.authService.register(registerDto);
+      await this.authService.register(createDto);
 
     response.cookie("refreshToken", refreshToken, {
       httpOnly: true,

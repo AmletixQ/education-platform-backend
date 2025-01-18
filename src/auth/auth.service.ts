@@ -4,11 +4,11 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { LoginDto } from "./dto/login.dto";
-import { RegisterDto } from "./dto/register.dto";
 import { compare, genSalt, hash } from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ROLE } from "@prisma/client";
 import { UserService } from "src/user/user.service";
+import { CreateDto } from "src/user/dto/create.dto";
 
 @Injectable()
 export class AuthService {
@@ -30,7 +30,7 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: CreateDto) {
     const user = await this.userService.getUserByEmail(registerDto.email);
     if (user) {
       throw new BadRequestException("User with this email already exists");
