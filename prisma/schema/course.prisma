@@ -5,7 +5,7 @@ model Course {
 
   homeworks Homework[]
   lessons   Lesson[]
-  student   Student[]
+  students  Student[]
 
   teacher   Teacher @relation(fields: [teacherId], references: [userId])
   teacherId String  @unique @map("teacher_id")
